@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -20,26 +21,94 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
 
-const formSchema = z.object({
-  email: z.string().email(),
-});
+const formSchema = z
+  .object({
+    email: z.string().email(),
+    accountType: z.enum(["personal", "company"]),
+    companyName: z.string().optional(),
+    numberOfEmployees: z.coerce.number().optional(),
+    dob: z.date().refine((date) => {
+      const today = new Date();
+      const eighteenYearsAgo = new Date(
+        today.setFullYear(
+          today.getFullYear() - 18,
+          today.getMonth(),
+          today.getDate()
+        )
+      );
+      return date <= eighteenYearsAgo;
+    }, "You must be at least 18 years old"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .refine((password) => {
+        return /^(?=.*[!@#$^&*])(?=.*[A-Z]).*$/.test(password);
+      }, "Password must contain at least one uppercase letter and one special character"),
+    passwordConfirm: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.passwordConfirm) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["passwordConfirm"],
+        message: "Passwords do not match",
+      });
+    }
+    if (data.accountType === "company" && !data.companyName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["companyName"],
+        message: "Company name is required",
+      });
+    }
+    if (
+      data.accountType === "company" &&
+      (!data.numberOfEmployees || data.numberOfEmployees < 1)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["numberOfEmployees"],
+        message: "Number of employees is required",
+      });
+    }
+  });
 
 export default function SignupPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
+      accountType: "personal",
+      companyName: "",
+      numberOfEmployees: 0,
     },
   });
 
   const handleSubmit = () => {
     console.log(form.getValues());
   };
+
+  const accountType = form.watch("accountType");
+
+  const [isPopOverOpen, setIsPopOverOpen] = useState(false);
 
   return (
     <>
@@ -68,7 +137,142 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="accountType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account type</FormLabel>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select an account type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="personal">Personal</SelectItem>
+                        <SelectItem value="company">Company</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {accountType === "company" && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="companyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company name</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Company name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="numberOfEmployees"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of employees</FormLabel>
+                        <FormControl>
+                          <Input type="number" min={0} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+              <FormField
+                control={form.control}
+                name="dob"
+                render={({ field }) => {
+                  const dobFromDate = new Date();
+                  dobFromDate.setFullYear(dobFromDate.getFullYear() - 120);
 
+                  return (
+                    <FormItem className="flex flex-col pt-2">
+                      <FormLabel>Date of birth</FormLabel>
+                      <Popover open={isPopOverOpen}>
+                        <PopoverTrigger
+                          asChild
+                          onClick={() => setIsPopOverOpen(true)}
+                        >
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className="normal-case flex justify-between pr-1"
+                            >
+                              <span>
+                                {field.value?.toLocaleDateString() ||
+                                  "Pick a date"}
+                              </span>
+                              <CalendarIcon size={16} />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            defaultMonth={field.value}
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            onDayClick={() => setIsPopOverOpen(false)}
+                            fixedWeeks
+                            weekStartsOn={1}
+                            startMonth={dobFromDate}
+                            captionLayout="dropdown"
+                            disabled={{
+                              after: new Date(),
+                              before: dobFromDate,
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="********"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="passwordConfirm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="********"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button type="submit">Sign up</Button>
             </form>
           </Form>
