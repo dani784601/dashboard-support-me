@@ -48,10 +48,10 @@ const formSchema = z
     email: z.string().email(),
     accountType: z.enum(["personal", "company"]),
     companyName: z.string().optional(),
-    numberOfEmployees: z.coerce.number().min(1).optional(),
+    numberOfEmployees: z.number().min(1).optional(),
     acceptTerms: z
       .boolean({
-        required_error: "You must accept the terms and conditions",
+        error: "You must accept the terms and conditions",
       })
       .refine((checked) => checked, "You must accept the terms and conditions"),
     dob: z.date().refine((date) => {
@@ -110,7 +110,7 @@ export default function SignupPage() {
       passwordConfirm: "",
       companyName: "",
       accountType: "personal",
-      numberOfEmployees: 0,
+      numberOfEmployees: undefined,
       dob: undefined,
       acceptTerms: false,
     },
