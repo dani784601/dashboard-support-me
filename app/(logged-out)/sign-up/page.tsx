@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -22,6 +23,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,6 +39,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 
@@ -45,7 +48,12 @@ const formSchema = z
     email: z.string().email(),
     accountType: z.enum(["personal", "company"]),
     companyName: z.string().optional(),
-    numberOfEmployees: z.number().min(1).optional(),
+    numberOfEmployees: z.coerce.number().min(1).optional(),
+    acceptTerms: z
+      .boolean({
+        required_error: "You must accept the terms and conditions",
+      })
+      .refine((checked) => checked, "You must accept the terms and conditions"),
     dob: z.date().refine((date) => {
       const today = new Date();
       const eighteenYearsAgo = new Date(
@@ -93,19 +101,24 @@ const formSchema = z
   });
 
 export default function SignupPage() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      accountType: "personal",
+      password: "",
+      passwordConfirm: "",
       companyName: "",
-      dob: new Date(),
-      numberOfEmployees: 1,
+      accountType: "personal",
+      numberOfEmployees: 0,
+      dob: undefined,
+      acceptTerms: false,
     },
   });
 
-  const handleSubmit = () => {
-    console.log(form.getValues());
+  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log(data);
+    router.push("/dashboard");
   };
 
   const accountType = form.watch("accountType");
@@ -182,7 +195,12 @@ export default function SignupPage() {
                       <FormItem>
                         <FormLabel>Number of employees</FormLabel>
                         <FormControl>
-                          <Input type="number" min={0} {...field} />
+                          <Input
+                            type="number"
+                            min={0}
+                            {...field}
+                            value={field.value ?? ""}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -264,6 +282,31 @@ export default function SignupPage() {
                       <PasswordInput placeholder="********" {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="acceptTerms"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex gap-2 items-center">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel>I accept the terms and conditions</FormLabel>
+                    </div>
+                    <FormMessage />
+                    <FormDescription>
+                      By signing up, you agree to our{" "}
+                      <Link className="text-primary underline" href="/terms">
+                        terms and conditions
+                      </Link>
+                      .
+                    </FormDescription>
                   </FormItem>
                 )}
               />
