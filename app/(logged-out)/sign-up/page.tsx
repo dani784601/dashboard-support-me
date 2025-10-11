@@ -45,7 +45,7 @@ const formSchema = z
     email: z.string().email(),
     accountType: z.enum(["personal", "company"]),
     companyName: z.string().optional(),
-    numberOfEmployees: z.coerce.number().optional(),
+    numberOfEmployees: z.number().min(1).optional(),
     dob: z.date().refine((date) => {
       const today = new Date();
       const eighteenYearsAgo = new Date(
@@ -99,7 +99,8 @@ export default function SignupPage() {
       email: "",
       accountType: "personal",
       companyName: "",
-      numberOfEmployees: 0,
+      dob: new Date(),
+      numberOfEmployees: 1,
     },
   });
 
