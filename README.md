@@ -8,8 +8,8 @@
 
 2. Popover + Calendar 커스텀 컴포넌트 (유효성검증-18세 이상)
 
-<img width="537" height="758" alt="image" src="https://github.com/user-attachments/assets/f6b68c46-d7b4-47f8-b49e-1175e816fdbf" />
-<img width="680" height="344" alt="image" src="https://github.com/user-attachments/assets/7c953a28-d7cf-4c05-a8af-cea84434547b" />
+<img width="268" height="379" alt="image" src="https://github.com/user-attachments/assets/f6b68c46-d7b4-47f8-b49e-1175e816fdbf" />
+<img width="268" height="379" alt="image" src="https://github.com/user-attachments/assets/631ce0dd-0865-4a91-bffe-41d5a8ac52d2" />
 
 3. 가입 폼 검증 (React Hook Form + Zod)
 
