@@ -87,7 +87,7 @@ const data = [
 ];
 export default function SupportTicketsResolved() {
   return (
-    <ResponsiveContainer height={350} width="100%" stroke="#888888">
+    <ResponsiveContainer height={350} width="100%">
       <LineChart data={data}>
         <XAxis fontSize={12} dataKey="name" />
         <YAxis fontSize={12} />
