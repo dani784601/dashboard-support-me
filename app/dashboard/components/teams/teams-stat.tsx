@@ -1,5 +1,10 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { UsersIcon, ListChecksIcon, StarIcon } from "lucide-react";
+import {
+  UsersIcon,
+  ListChecksIcon,
+  StarIcon,
+  PieChartIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,6 +18,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import TeamDistributionChart from "./team-distribution-chart";
 
 const teamLeaders = [
   {
@@ -118,11 +124,16 @@ export default function TeamsStats() {
             </CardContent>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="pb-0">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Team distribution</CardTitle>
+            <CardTitle className="text-base flex justify-between items-center">
+              <span>Team distribution</span>
+              <PieChartIcon />
+            </CardTitle>
           </CardHeader>
-          <CardContent className="flex gap-2 items-center"></CardContent>
+          <CardContent>
+            <TeamDistributionChart />
+          </CardContent>
         </Card>
       </div>
       <Card className="my-4">
