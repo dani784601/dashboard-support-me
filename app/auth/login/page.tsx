@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useRouter } from "next/navigation";
+import { loginWithGithub } from "@/app/actions/auth";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -92,6 +93,11 @@ export default function LoginPage() {
                 )}
               />
               <Button type="submit">Login</Button>
+            </form>
+            <form action={loginWithGithub} className="py-2">
+              <Button variant="outline" type="submit">
+                Sign in with Github
+              </Button>
             </form>
           </Form>
         </CardContent>

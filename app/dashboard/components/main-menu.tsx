@@ -1,9 +1,10 @@
 import MenuTitle from "./menu-title";
 import MenuItem from "./menu-item";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import Link from "next/link";
 import LightDarkToggle from "@/components/ui/light-dark-toggle";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { logoutWithGithub } from "../../actions/auth";
 
 export default function MainMenu({ className }: { className?: string }) {
   return (
@@ -26,9 +27,9 @@ export default function MainMenu({ className }: { className?: string }) {
             TT
           </AvatarFallback>
         </Avatar>
-        <Link href="/" className="hover:underline">
-          Logout
-        </Link>
+        <form action={logoutWithGithub}>
+          <Button variant="outline">Logout</Button>
+        </form>
         <LightDarkToggle className="ml-auto" />
       </footer>
     </nav>
